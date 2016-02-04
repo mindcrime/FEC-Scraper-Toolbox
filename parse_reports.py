@@ -12,6 +12,8 @@ import os
 import pyodbc
 import shutil
 import time
+import sys
+
 
 """
   Currently supported forms and versions:
@@ -41,24 +43,14 @@ import time
  * TEXT: all versions through 8.1 (does not exist in v1 or v2)
 """
 
-# Try to import user settings or set them explicitly.
-try:
-    import usersettings
-    DBCONNSTR = usersettings.DBCONNSTR
-    RPTERRDIR = usersettings.RPTERRDIR
-    RPTHOLDDIR = usersettings.RPTHOLDDIR
-    RPTOUTDIR = usersettings.RPTOUTDIR
-    RPTPROCDIR = usersettings.RPTPROCDIR
-    RPTRVWDIR = usersettings.RPTRVWDIR
-    RPTSVDIR = usersettings.RPTSVDIR
-except:
-    DBCONNSTR = ''
-    RPTERRDIR = 'C:\\data\\FEC\\Reports\\ErrorLogs\\'
-    RPTHOLDDIR = 'C:\\data\\FEC\\Reports\\Hold\\'
-    RPTOUTDIR = 'C:\\data\\FEC\\Reports\\Output\\'
-    RPTPROCDIR = 'C:\\data\\FEC\\Reports\\Processed\\'
-    RPTRVWDIR = 'C:\\data\\FEC\\Reports\\Review\\'
-    RPTSVDIR = 'C:\\data\\FEC\\Reports\\Import\\'
+DBCONNSTR = ''
+RPTERRDIR = './errorlogs/'
+RPTHOLDDIR = './hold/'
+RPTOUTDIR = './output/'
+RPTPROCDIR = './processed/'
+RPTRVWDIR = './review/'
+# RPTSVDIR = './'
+RPTSVDIR = '/home/prhodes/customer_workspaces/majority_strategies/FEC/data/ftp_site_files/ftp.fec.gov/FEC/electronic/201512/'
 
 # Other user variables
 # --------------------
@@ -347,8 +339,8 @@ def convert_to_date(val, dateformat, image, fieldname, formtype, rownbr, sched, 
                         year = '19' + val[-2:]
                 else:
                     add_entry_to_error_log(errfile, str(image) + '\t' + sched + '\t' + trans + '\t' + str(rownbr) + '\t' + formtype + '\t' + fieldname + '\t' + val + '\t' + dateformat)
-                    with open(errfile, 'a+b') as output:
-                        output.write(errtxt + '\n')
+                    #with open(errfile, 'a+b') as output:
+                    #    output.write(errtxt + '\n')
                     return ''
             datestring = month + '/' + day + '/' + year
             datadate = time.strptime(datestring, '%m/%d/%Y')
@@ -981,7 +973,7 @@ def check_rpt_hdrs_f3p(image, data, namedelim='', dateformat='CCYYMMDD'):
     # TrsFullName
     if data['TrsFullName'] != '':
         if data['TrsLName'] != '' or data['TrsFName'] != '' or data['TrsMName'] != '' or data['TrsPfx'] != '' or data['TrsSfx'] != '':
-            AddEntryToErrorLog('Treasurer full name (' + data['TrsFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Treasurer full name (' + data['TrsFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             treas = parse_full_name(data['TrsFullName'], namedelim)
             data['TrsLName'] = treas[0]
@@ -1621,7 +1613,7 @@ def check_rpt_hdrs_f3x(image, data, namedelim='', dateformat='CCYYMMDD'):
     # TrsFullName
     if data['TrsFullName'] != '':
         if data['TrsLName'] != '' or data['TrsFName'] != '' or data['TrsMName'] != '' or data['TrsPfx'] != '' or data['TrsSfx'] != '':
-            AddEntryToErrorLog('Treasurer full name (' + data['TrsFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Treasurer full name (' + data['TrsFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             treas = parse_full_name(data['TrsFullName'], namedelim)
             data['TrsLName'] = treas[0]
@@ -2008,7 +2000,7 @@ def check_rpt_hdrs_f1(image, data, namedelim='', dateformat='CCYYMMDD'):
     # SignFullName
     if data['SignFullName'] != '':
         if data['SignLName'] != '' or data['SignFName'] != '' or data['SignMName'] != '' or data['SignPfx'] != '' or data['SignSfx'] != '':
-            AddEntryToErrorLog('Signer full name (' + data['SignFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Signer full name (' + data['SignFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             treas = parse_full_name(data['SignFullName'], namedelim)
             data['SignLName'] = treas[0]
@@ -2048,7 +2040,7 @@ def check_rpt_hdrs_f1(image, data, namedelim='', dateformat='CCYYMMDD'):
     # CandFullName
     if data['CandFullName'] != '':
         if data['CandLName'] != '' or data['CandFName'] != '' or data['CandMName'] != '' or data['CandPfx'] != '' or data['CandSfx'] != '':
-            AddEntryToErrorLog('Candidate full name (' + data['CandFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Candidate full name (' + data['CandFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             treas = parse_full_name(data['CandFullName'], namedelim)
             data['CandLName'] = treas[0]
@@ -2146,7 +2138,7 @@ def check_rpt_hdrs_f1(image, data, namedelim='', dateformat='CCYYMMDD'):
     # CustFullName
     if data['CustFullName'] != '':
         if data['CustLName'] != '' or data['CustFName'] != '' or data['CustMName'] != '' or data['CustPfx'] != '' or data['CustSfx'] != '':
-            AddEntryToErrorLog('Custodian full name (' + data['CustFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Custodian full name (' + data['CustFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             treas = parse_full_name(data['CustFullName'], namedelim)
             data['CustLName'] = treas[0]
@@ -2196,7 +2188,7 @@ def check_rpt_hdrs_f1(image, data, namedelim='', dateformat='CCYYMMDD'):
     # TrsFullName
     if data['TrsFullName'] != '':
         if data['TrsLName'] != '' or data['TrsFName'] != '' or data['TrsMName'] != '' or data['TrsPfx'] != '' or data['TrsSfx'] != '':
-            AddEntryToErrorLog('Treasurer full name (' + data['TrsFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Treasurer full name (' + data['TrsFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             treas = parse_full_name(data['TrsFullName'], namedelim)
             data['TrsLName'] = treas[0]
@@ -2246,7 +2238,7 @@ def check_rpt_hdrs_f1(image, data, namedelim='', dateformat='CCYYMMDD'):
     # AgtFullName
     if data['AgtFullName'] != '':
         if data['AgtLName'] != '' or data['AgtFName'] != '' or data['AgtMName'] != '' or data['AgtPfx'] != '' or data['AgtSfx'] != '':
-            AddEntryToErrorLog('Agent full name (' + data['AgtFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Agent full name (' + data['AgtFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             treas = parse_full_name(data['AgtFullName'], namedelim)
             data['AgtLName'] = treas[0]
@@ -2470,7 +2462,7 @@ def check_row_data_sch_a(data, image, rownbr, namedelim='', dateformat='CCYYMMDD
     # ContFullName
     if data['ContFullName'] != '':
         if data['ContLName'] != '' or data['ContFName'] != '' or data['ContMName'] != '' or data['ContPfx'] != '' or data['ContSfx'] != '':
-            AddEntryToErrorLog('Contributor full name (' + data['ContFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Contributor full name (' + data['ContFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             name = parse_full_name(data['ContFullName'], namedelim)
             data['ContLName'] = name[0]
@@ -2562,7 +2554,7 @@ def check_row_data_sch_a(data, image, rownbr, namedelim='', dateformat='CCYYMMDD
     # DonorCandFullName
     if data['DonorCandFullName'] != '':
         if data['DonorCandLName'] != '' or data['DonorCandFName'] != '' or data['DonorCandMName'] != '' or data['DonorCandPfx'] != '' or data['DonorCandSfx'] != '':
-            AddEntryToErrorLog('Donor candidater full name (' + data['DonorCandFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Donor candidater full name (' + data['DonorCandFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             name = parse_full_name(data['DonorCandFullName'], namedelim)
             data['DonorCandLName'] = name[0]
@@ -2654,7 +2646,7 @@ def check_row_data_sch_b(data, image, rownbr, namedelim='', dateformat='CCYYMMDD
     # PayeeFullName
     if data['PayeeFullName'] != '':
         if data['PayeeLName'] != '' or data['PayeeFName'] != '' or data['PayeeMName'] != '' or data['PayeePfx'] != '' or data['PayeeSfx'] != '':
-            AddEntryToErrorLog('Payee full name (' + data['PayeeFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Payee full name (' + data['PayeeFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             name = parse_full_name(data['PayeeFullName'], namedelim)
             data['PayeeLName'] = name[0]
@@ -2731,7 +2723,7 @@ def check_row_data_sch_b(data, image, rownbr, namedelim='', dateformat='CCYYMMDD
     # BenCandFullName
     if data['BenCandFullName'] != '':
         if data['BenCandLName'] != '' or data['BenCandFName'] != '' or data['BenCandMName'] != '' or data['BenCandPfx'] != '' or data['BenCandSfx'] != '':
-            AddEntryToErrorLog('Beneficiary candidate full name (' + data['BenCandFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Beneficiary candidate full name (' + data['BenCandFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             name = parse_full_name(data['BenCandFullName'], namedelim)
             data['BenCandLName'] = name[0]
@@ -3030,7 +3022,7 @@ def check_row_data_sch_c1(data, image, rownbr, namedelim='', dateformat='CCYYMMD
     # TrsFullName
     if data['TrsFullName'] != '':
         if data['TrsLName'] != '' or data['TrsFName'] != '' or data['TrsMName'] != '' or data['TrsPfx'] != '' or data['TrsSfx'] != '':
-            AddEntryToErrorLog('Treasurer full name (' + data['TrsFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Treasurer full name (' + data['TrsFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             treas = parse_full_name(data['TrsFullName'], namedelim)
             data['TrsLName'] = treas[0]
@@ -3062,7 +3054,7 @@ def check_row_data_sch_c1(data, image, rownbr, namedelim='', dateformat='CCYYMMD
     # LendRepFullName
     if data['LendRepFullName'] != '':
         if data['LendRepLName'] != '' or data['LendRepFName'] != '' or data['LendRepMName'] != '' or data['LendRepPfx'] != '' or data['LendRepSfx'] != '':
-            AddEntryToErrorLog('Treasurer full name (' + data['LendRepFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Treasurer full name (' + data['LendRepFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             treas = parse_full_name(data['LendRepFullName'], namedelim)
             data['LendRepLName'] = treas[0]
@@ -3112,7 +3104,7 @@ def check_row_data_sch_c2(data, image, rownbr, namedelim='', dateformat='CCYYMMD
     # GuarFullName
     if data['GuarFullName'] != '':
         if data['GuarLName'] != '' or data['GuarFName'] != '' or data['GuarMName'] != '' or data['GuarPfx'] != '' or data['GuarSfx'] != '':
-            AddEntryToErrorLog('Treasurer full name (' + data['GuarFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Treasurer full name (' + data['GuarFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             guar = parse_full_name(data['GuarFullName'], namedelim)
             data['GuarLName'] = guar[0]
@@ -3289,7 +3281,7 @@ def check_row_data_sch_e(data, image, rownbr, namedelim='', dateformat='CCYYMMDD
     # PayeeFullName
     if data['PayeeFullName'] != '':
         if data['PayeeLName'] != '' or data['PayeeFName'] != '' or data['PayeeMName'] != '' or data['PayeePfx'] != '' or data['PayeeSfx'] != '':
-            AddEntryToErrorLog('Payee full name (' + data['PayeeFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Payee full name (' + data['PayeeFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             name = parse_full_name(data['PayeeFullName'], namedelim)
             data['PayeeLName'] = name[0]
@@ -3366,7 +3358,7 @@ def check_row_data_sch_e(data, image, rownbr, namedelim='', dateformat='CCYYMMDD
     # SupOppCandFullName
     if data['SupOppCandFullName'] != '':
         if data['SupOppCandLName'] != '' or data['SupOppCandFName'] != '' or data['SupOppCandMName'] != '' or data['SupOppCandPfx'] != '' or data['SupOppCandSfx'] != '':
-            AddEntryToErrorLog('Sup/Opp candidate full name (' + data['SupOppCandFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Sup/Opp candidate full name (' + data['SupOppCandFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             name = parse_full_name(data['SupOppCandFullName'], namedelim)
             data['SupOppCandLName'] = name[0]
@@ -3404,7 +3396,7 @@ def check_row_data_sch_e(data, image, rownbr, namedelim='', dateformat='CCYYMMDD
     # CompFullName
     if data['CompFullName'] != '':
         if data['CompLName'] != '' or data['CompFName'] != '' or data['CompMName'] != '' or data['CompPfx'] != '' or data['CompSfx'] != '':
-            AddEntryToErrorLog('Form completed by full name (' + data['CompFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Form completed by full name (' + data['CompFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             name = parse_full_name(data['CompFullName'], namedelim)
             data['CompLName'] = name[0]
@@ -3497,7 +3489,7 @@ def check_row_data_sch_f(data, image, rownbr, namedelim='', dateformat='CCYYMMDD
     # PayeeFullName
     if data['PayeeFullName'] != '':
         if data['PayeeLName'] != '' or data['PayeeFName'] != '' or data['PayeeMName'] != '' or data['PayeePfx'] != '' or data['PayeeSfx'] != '':
-            AddEntryToErrorLog('Payee full name (' + data['PayeeFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Payee full name (' + data['PayeeFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             name = parse_full_name(data['PayeeFullName'], namedelim)
             data['PayeeLName'] = name[0]
@@ -3565,7 +3557,7 @@ def check_row_data_sch_f(data, image, rownbr, namedelim='', dateformat='CCYYMMDD
     # PayeeCandFullName
     if data['PayeeCandFullName'] != '':
         if data['PayeeCandLName'] != '' or data['PayeeCandFName'] != '' or data['PayeeCandMName'] != '' or data['PayeeCandPfx'] != '' or data['PayeeCandSfx'] != '':
-            AddEntryToErrorLog('Payee candidate full name (' + data['PayeeCandFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Payee candidate full name (' + data['PayeeCandFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             name = parse_full_name(data['PayeeCandFullName'], namedelim)
             data['PayeeCandLName'] = name[0]
@@ -3742,7 +3734,7 @@ def check_row_data_sch_h4(data, image, rownbr, namedelim='', dateformat='CCYYMMD
     # PayeeFullName
     if data['PayeeFullName'] != '':
         if data['PayeeLName'] != '' or data['PayeeFName'] != '' or data['PayeeMName'] != '' or data['PayeePfx'] != '' or data['PayeeSfx'] != '':
-            AddEntryToErrorLog('Payee full name (' + data['PayeeFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Payee full name (' + data['PayeeFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             name = parse_full_name(data['PayeeFullName'], namedelim)
             data['PayeeLName'] = name[0]
@@ -3896,7 +3888,7 @@ def check_row_data_sch_h6(data, image, rownbr, namedelim='', dateformat='CCYYMMD
     # PayeeFullName
     if data['PayeeFullName'] != '':
         if data['PayeeLName'] != '' or data['PayeeFName'] != '' or data['PayeeMName'] != '' or data['PayeePfx'] != '' or data['PayeeSfx'] != '':
-            AddEntryToErrorLog('Payee full name (' + data['PayeeFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
+            add_entry_to_error_log('Payee full name (' + data['PayeeFullName'] + ') could not be parsed for ' + imageid + ' because that would overwrite existing data. This script will attempt to add this data row to the database, but the full name field will be ignored.')
         elif namedelim != '':
             name = parse_full_name(data['PayeeFullName'], namedelim)
             data['PayeeLName'] = name[0]
@@ -4231,7 +4223,7 @@ def check_row_data_text(data, image, rownbr, namedelim='', dateformat='CCYYMMDD'
 
 
 ##############################################
-
+print "Starting here..."
 
 
 # Built list of supported report types
@@ -4343,6 +4335,7 @@ for fecfile in glob.glob(os.path.join(RPTSVDIR, '*.fec')):
     if filectr > FILELIMIT:
         break
 
+    print "file: " + fecfile
     # Store ImageID in variable
     imageid = int(fecfile.replace(RPTSVDIR, '').replace('.fec', ''))
 
@@ -4371,6 +4364,8 @@ for fecfile in glob.glob(os.path.join(RPTSVDIR, '*.fec')):
     # Extract report header
     rpthdr = linecache.getline(fecfile, x)
 
+#    print rpthdr
+    
     # Clear linecache
     linecache.clearcache()
 
@@ -4380,11 +4375,15 @@ for fecfile in glob.glob(os.path.join(RPTSVDIR, '*.fec')):
 
     # Extract report type from report header
     fullrpttype = rpthdr[:rpthdr.find(SRCDELIMITER)].lstrip(' "').rstrip(' "')
+    
+    print "Report Type: " + fullrpttype
+    
     rpttype = fullrpttype.rstrip('ANT')
 
     # If report type not supported, move file to Hold directory
     # and proceed to next file; otherwise retrieve header version
     if rpttype not in rpttypes:
+        print "Report Type not supported, place on hold"
         os.rename(fecfile, fecfile.replace(RPTSVDIR, RPTHOLDDIR))
         continue
     else:
@@ -4473,7 +4472,8 @@ for fecfile in glob.glob(os.path.join(RPTSVDIR, '*.fec')):
             elif rpthdrdata['TrsFullName'].find(',') != -1:
                 filehdrdata['NmDelim'] = ','
 
-    # Call function to verify data is valid, then load into database
+    foo = """
+     Call function to verify data is valid, then load into database
     sqlresult = 0
     if rpttype == 'F3':
         rpthdrdata = check_rpt_hdrs_f3(imageid, rpthdrdata, filehdrdata['NmDelim'], filehdrdata['DtFmt'])
@@ -4491,13 +4491,14 @@ for fecfile in glob.glob(os.path.join(RPTSVDIR, '*.fec')):
         rpthdrdata = check_rpt_hdrs_f1(imageid, rpthdrdata, filehdrdata['NmDelim'], filehdrdata['DtFmt'])
         sqlresult = load_rpt_hdrs(rpttype, imageid, rpthdrdata, filehdrdata, outputhdrs[rpttype], DBCONNSTR)
 
-    # On error, move file to Review directory
+     On error, move file to Review directory
     if sqlresult == -1:
         shutil.move(fecfile, fecfile.replace(RPTSVDIR, RPTRVWDIR))
         continue
     elif sqlresult == -2:
         shutil.move(fecfile, fecfile.replace(RPTSVDIR, RPTRVWDIR))
         continue
+    """
 
     # ITERATE OVER DATA ROWS
     # ----------------------
