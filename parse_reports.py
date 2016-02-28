@@ -44,13 +44,25 @@ import sys
 """
 
 DBCONNSTR = ''
-RPTERRDIR = './errorlogs/'
-RPTHOLDDIR = './hold/'
-RPTOUTDIR = './output/'
-RPTPROCDIR = './processed/'
-RPTRVWDIR = './review/'
+RPTERRDIR = '/home/centos/FEC-Scraper-Toolbox/data/errorlogs/'
+# RPTHOLDDIR = './hold/'
+RPTOUTDIR = '/home/centos/FEC-Scraper-Toolbox/data/output/'
+# RPTPROCDIR = './processed/'
+RPTRVWDIR = '/home/centos/FEC-Scraper-Toolbox/data/review/'
 # RPTSVDIR = './'
-RPTSVDIR = '/home/prhodes/customer_workspaces/majority_strategies/FEC/data/ftp_site_files/ftp.fec.gov/FEC/electronic/201512/'
+# RPTSVDIR = '/home/prhodes/customer_workspaces/majority_strategies/FEC/data/ftp_site_files/ftp.fec.gov/FEC/electronic/201512/'
+
+#    ARCPROCDIR = '/home/centos/FEC-Scraper-Toolbox/data/archives/processed/'
+#    ARCSVDIR = '/home/centos/FEC-Scraper-Toolbox/data/archives/import/'
+RPTHOLDDIR = '/home/centos/FEC-Scraper-Toolbox/data/hold/'
+RPTPROCDIR = '/home/centos/FEC-Scraper-Toolbox/data/processed/'
+RPTSVDIR = '/home/centos/FEC-Scraper-Toolbox/data/import/'
+
+
+
+
+
+
 
 # Other user variables
 # --------------------
@@ -59,7 +71,7 @@ RPTSVDIR = '/home/prhodes/customer_workspaces/majority_strategies/FEC/data/ftp_s
 BADREPORTS = [17247, 304004]
 
 # Use this variable to limit the number of reports to process.
-FILELIMIT = 100000
+FILELIMIT = 1000000
 
 # Set default delimiter used in electronic reports to ASCII-28
 # Note that this is the delimiter used in the source data files.
@@ -2445,7 +2457,7 @@ def check_row_data_sch_a(data, image, rownbr, namedelim='', dateformat='CCYYMMDD
     data['TransID'] = clean_sql_text(data['TransID'])
     if len(data['TransID']) > 20:
         print(("TransID field too long.", image, rownbr, data))
-        sys.exit(("TransID field too long.", image, rownbr, data))
+        # sys.exit(("TransID field too long.", image, rownbr, data))
     
     # BkRefTransID
     data['BkRefTransID'] = clean_sql_text(data['BkRefTransID'])
@@ -2501,7 +2513,7 @@ def check_row_data_sch_a(data, image, rownbr, namedelim='', dateformat='CCYYMMDD
     data['StAbbr'] = clean_sql_text(data['StAbbr'])
     if len(data['StAbbr']) > 2:
         print(("StAbbr field too long.", image, rownbr, data))
-        sys.exit(("StAbbr field too long.", image, rownbr, data))
+        # sys.exit(("StAbbr field too long.", image, rownbr, data))
 
     # Zip
     data['Zip'] = clean_sql_text(data['Zip'])
@@ -2531,19 +2543,19 @@ def check_row_data_sch_a(data, image, rownbr, namedelim='', dateformat='CCYYMMDD
     data['Emp'] = clean_sql_text(data['Emp'])
     if len(data['Emp']) > 38:
         print(("Emp field too long.", image, rownbr, data))
-        sys.exit(("Emp field too long.", image, rownbr, data))
+        # sys.exit(("Emp field too long.", image, rownbr, data))
 
     # Occ
     data['Occ'] = clean_sql_text(data['Occ'])
     if len(data['Occ']) > 38:
         print(("Occ field too long.", image, rownbr, data))
-        sys.exit(("Occ field too long.", image, rownbr, data))
+        # sys.exit(("Occ field too long.", image, rownbr, data))
 
     # DonorCommID
     data['DonorCommID'] = clean_sql_text(data['DonorCommID'])
     if len(data['DonorCommID']) > 11:
         print(("DonorCommID field too long.", image, rownbr, data))
-        sys.exit(("DonorCommID field too long.", image, rownbr, data))
+        # sys.exit(("DonorCommID field too long.", image, rownbr, data))
 
     # DonorCommNm
     data['DonorCommNm'] = clean_sql_text(data['DonorCommNm'])
@@ -2584,7 +2596,7 @@ def check_row_data_sch_a(data, image, rownbr, namedelim='', dateformat='CCYYMMDD
     data['DonorCandOfc'] = clean_sql_text(data['DonorCandOfc'])
     if len(data['DonorCandOfc']) > 3:
         print(("DonorCandOfc field too long.", image, rownbr, data))
-        sys.exit(("DonorCandOfc field too long.", image, rownbr, data))
+        # sys.exit(("DonorCandOfc field too long.", image, rownbr, data))
 
     # DonorCandSt
     data['DonorCandSt'] = clean_sql_text(data['DonorCandSt'])

@@ -23,15 +23,15 @@ try:
     RPTPROCDIR = usersettings.RPTPROCDIR
     RPTSVDIR = usersettings.RPTSVDIR
 except:
-    ARCPROCDIR = 'C:\\data\\FEC\\Archives\\Processed\\'
-    ARCSVDIR = 'C:\\data\\FEC\\Archives\\Import\\'
-    RPTHOLDDIR = 'C:\\data\\FEC\\Reports\\Hold\\'
-    RPTPROCDIR = 'C:\\data\\FEC\\Reports\\Processed\\'
-    RPTSVDIR = 'C:\\data\\FEC\\Reports\\Import\\'
+    ARCPROCDIR = '/home/centos/FEC-Scraper-Toolbox/data/archives/processed/'
+    ARCSVDIR = '/home/centos/FEC-Scraper-Toolbox/data/archives/import/'
+    RPTHOLDDIR = '/home/centos/FEC-Scraper-Toolbox/data/hold/'
+    RPTPROCDIR = '/home/centos/FEC-Scraper-Toolbox/data/processed/'
+    RPTSVDIR = '/home/centos/FEC-Scraper-Toolbox/data/import/'
 
 # Other user variables
 ARCFTP = 'ftp://ftp.fec.gov/FEC/electronic/'
-NUMPROC = 10  # Multiprocessing processes to run simultaneously
+NUMPROC = 1  # Multiprocessing processes to run simultaneously
 RPTFTP = 'ftp.fec.gov'
 RPTURL = 'http://docquery.fec.gov/dcdev/posted/' # Old URL: http://query.nictusa.com/dcdev/posted/
 RSSURL = 'http://efilingapps.fec.gov/rss/generate?preDefinedFilingType=ALL' # Old URL: http://fecapps.nictusa.com/rss/generate?preDefinedFilingType=ALL
@@ -135,6 +135,10 @@ def download_archive(archive):
     """
     src = ARCFTP + archive
     dest = ARCSVDIR + archive
+
+    print "src = " + src
+    print "dest = " + dest
+
     y = 0
     try:
         srclen = float(
@@ -173,9 +177,12 @@ def download_report(download):
     try:
         srclen = float(
             urllib2.urlopen(url).info().get('Content-Length'))
-    except:
+    except BaseException as e:
+        print "Error({0}): {1}".format(e.errno, e.strerror)
         y = 5
+
     filename = RPTSVDIR + download + '.fec'
+
     while y < 5:
         try:
             urllib.urlretrieve(url, filename)
@@ -188,7 +195,8 @@ def download_report(download):
                 continue
             else:
                 y = 6
-        except:
+        except BaseException as e:
+            print "Error({0}): {1}".format(e.errno, e.strerror)
             y += 1
     if y == 5:
         print('Report ' + download + ' could not be downloaded.')
@@ -311,8 +319,8 @@ if __name__ == '__main__':
     # VALUES.
     # Set mostrecent to the last date you DON'T want, so if you want
     # everything since Jan. 1, 2013, set mostrecent to: '20121231.zip'
-    # zipinfo['mostrecent'] = '20121231.zip' # YYYYMMDD.zip
-    # zipinfo['badfiles'] = [] # You probably want to leave this blank
+    zipinfo['mostrecent'] = '20081231.zip' # YYYYMMDD.zip
+    zipinfo['badfiles'] = [] # You probably want to leave this blank
 
     # Build a list of previously downloaded archives
     print('Building a list of previously downloaded archive files...')
