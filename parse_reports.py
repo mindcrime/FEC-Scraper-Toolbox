@@ -460,7 +460,7 @@ def parse_data_row(data, delim):
     # be joined together and the parsing to fail. For that reason, I'm
     # using csv module only for comma delimiters.
     if delim == ',':
-        for x in csv.reader([data], SRCDELIMITER=',', quotechar='"'):
+        for x in csv.reader([data], delimiter=',', quotechar='"'):
             data = x
     else:
         data = data.split(delim)
@@ -4270,7 +4270,7 @@ with open(schedafile, 'wb') as outputfile:
     outputfile.write('ImageID' + OUTPUTDELIMITER + 'PrtTp' + OUTPUTDELIMITER + OUTPUTDELIMITER.join(map(str, outputhdrs['SA'])) + '\r')
 
 with open(schedbfile, 'wb') as outputfile:
-    outputfile.write('ImageID' + OUTPUTDELIMITER + 'PrtTp' + OUTPUTDELIMITER + OUTPUTDELIMITER.join(map(str, outputhdrs['SB'])) + '\r')
+    outputfile.write('ImageID' + OUTPUTDELIMITER + 'PrtTp' + OUTPUTDELIMITER.join(map(str, outputhdrs['SB'])) + OUTPUTDELIMITER + "ReportID" + OUTPUTDELIMITER + "ReportNumber" + '\r')
 
 with open(schedcfile, 'wb') as outputfile:
     outputfile.write('ImageID' + OUTPUTDELIMITER + 'PrtTp' + OUTPUTDELIMITER + OUTPUTDELIMITER.join(map(str, outputhdrs['SC'])) + '\r')
@@ -4476,6 +4476,8 @@ for fecfile in glob.glob(os.path.join(RPTSVDIR, '*.fec')):
         if rowhdrs[x] in rpthdrdata.keys() and x < len(rpthdr): # 100235 (F3X, v5.0) missing last 12 cols after treas sign date
             rpthdrdata[rowhdrs[x]] = rpthdr[x].strip().replace(OUTPUTDELIMITER, ' ').strip(' "\n')
 
+    # print( "filehdrdata = " + str(filehdrdata))
+
     # Attempt to determine name delimiter if missing
     if filehdrdata['NmDelim'] == '':
         if 'TrsFullName' in rpthdrdata.keys():
@@ -4645,6 +4647,9 @@ for fecfile in glob.glob(os.path.join(RPTSVDIR, '*.fec')):
                 # Create list for the data row
                 data = build_data_row(linedata, linehdrs, imageid, fullrpttype)
                 schedb.append(data)
+                schedb.append( filehdrdata['RptID'] )
+                schedb.append( filehdrdata['RptNbr'] )
+
             elif formtype == 'SC':
                 # Validate data
                 linedata = check_row_data_sch_c(linedata, imageid, linenbr, filehdrdata['NmDelim'], filehdrdata['DtFmt'])
