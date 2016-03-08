@@ -4646,10 +4646,10 @@ for fecfile in glob.glob(os.path.join(RPTSVDIR, '*.fec')):
                 linehdrs.remove('BenCandFullName')
                 # Create list for the data row
                 data = build_data_row(linedata, linehdrs, imageid, fullrpttype)
+                # print( "rptid: \"" + filehdrdata['RptID'].strip() + "\"" )
+                data.append(filehdrdata['RptID'].strip())
+                data.append(filehdrdata['RptNbr'].strip())
                 schedb.append(data)
-                schedb.append( filehdrdata['RptID'] )
-                schedb.append( filehdrdata['RptNbr'] )
-
             elif formtype == 'SC':
                 # Validate data
                 linedata = check_row_data_sch_c(linedata, imageid, linenbr, filehdrdata['NmDelim'], filehdrdata['DtFmt'])
